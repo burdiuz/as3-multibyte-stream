@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" creationComplete="application1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import aw.projects.multibyte.MultibyteReader;
+			import aw.projects.multibyte.MultibyteWriter;
+			import aw.projects.multibyte.data.MultibyteBoolean;
+			import aw.projects.multibyte.data.MultibyteFloatSimple;
+			import aw.projects.multibyte.data.MultibyteInt;
+			import aw.projects.multibyte.data.MultibyteIntFlexible;
+			import aw.projects.multibyte.data.MultibytePackage;
+			import aw.projects.multibyte.data.MultibyteRange;
+			import aw.projects.multibyte.data.MultibyteStream;
+			import aw.projects.multibyte.data.MultibyteString;
+			import aw.projects.multibyte.data.MultibyteValueType;
+			import aw.projects.multibyte.data.string.MultibyteFloatEncoder;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.Base64Decoder;
+			import mx.utils.Base64Encoder;
+			//TODO пофиксить MultibyteFloatEncoder и добавить запись Infinity/NaN
+			static public const FIGURE_SIZE:int = 100;
+			private const _stream:MultibyteStream = new MultibyteStream();
+			private const _encoder:Base64Encoder = new Base64Encoder();
+			private const _decoder:Base64Decoder = new Base64Decoder();
+			protected function application1_creationCompleteHandler(event:FlexEvent):void{
+				this._encoder.insertNewLines = false;
+				this._stream.addItem(
+					new MultibyteBoolean(this.backgroundVisible, 'selected'), 
+					new MultibyteIntFlexible(this.backgroundColor, 'selectedColor', false), 
+					new MultibyteIntFlexible(this.figureColor, 'selectedColor', false), 
+					new MultibyteFloatSimple(this.figureAlpha, 'value', 2, false), 
+					new MultibyteInt(this.figureHAlign, 'selectedIndex', 2, false), 
+					new MultibyteInt(this.figureVAlign, 'selectedIndex', 2, false), 
+					new MultibyteFloatSimple(this.figureHScale, 'value', 2, false), 
+					new MultibyteFloatSimple(this.figureVScale, 'value', 2, false), 
+					new MultibyteIntFlexible(this.labelColor, 'selectedColor', false), 
+					new MultibyteFloatSimple(this.labelAlpha, 'value', 2, false), 
+					new MultibyteBoolean(this.labelWeight, 'selected'), 
+					new MultibyteBoolean(this.labelSize, 'value'), 
+					new MultibyteBoolean(this.labelDecoration, 'selected'), 
+					new MultibyteRange(this.labelSize, 'value', 8, 24), 
+					new MultibyteString(this.labelText, 'text', new MultibyteFloatEncoder())
+				);
+				var value:String = ExternalInterface.call('document.location.hash.toString');
+				if(value && value.length>1) this.decode(value.substr(1));
+				this.changeHandler(null);
+			}
+			private function calculateMultibyte():String{
+				this._stream.refresh();
+				this._stream.write();
+				this._encoder.encodeBytes(this._stream.byteArray);
+				return this._encoder.flush();
+			}
+			private function calculateURI():String{
+				const byteArray:ByteArray = new ByteArray();
+				byteArray.writeBoolean(this.backgroundVisible.selected);
+				byteArray.writeUnsignedInt(this.backgroundColor.selectedColor);
+				byteArray.writeUnsignedInt(this.figureColor.selectedColor);
+				byteArray.writeFloat(this.figureAlpha.value);
+				byteArray.writeByte(this.figureHAlign.selectedIndex);
+				byteArray.writeByte(this.figureVAlign.selectedIndex);
+				byteArray.writeFloat(this.figureHScale.value);
+				byteArray.writeFloat(this.figureVScale.value);
+				byteArray.writeUnsignedInt(this.labelColor.selectedColor);
+				byteArray.writeFloat(this.labelAlpha.value);
+				byteArray.writeBoolean(this.labelWeight.selected);
+				byteArray.writeByte(this.labelSize.value);
+				byteArray.writeBoolean(this.labelDecoration.selected);
+				byteArray.writeByte(this.labelSize.value);
+				byteArray.writeUTF(this.labelText.text);
+				this._encoder.encodeBytes(byteArray);
+				return this._encoder.flush();
+			}
+			private function changeHandler(event:Event):void{
+				const mul:String = this.calculateMultibyte();
+				ExternalInterface.call('function(){document.location.hash = "'+mul+'";}');
+				this.multibyte.text = mul;
+				this.multibyteLength.text = String(mul.length);
+				const uri:String = this.calculateURI();
+				this.base64.text = uri;
+				this.base64Length.text = String(uri.length);
+			}
+			private function decodeButton_clickHandler(event:MouseEvent):void{
+				this.decode(this.multibyte.text);
+				this.changeHandler(null);
+			}
+			protected function decode(text:String):void{
+				this._decoder.decode(text);
+				this._stream.byteArray = this._decoder.flush();
+				this._stream.read();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingTop="2"/>
+	</s:layout>
+	<s:HGroup width="100%" verticalAlign="middle" gap="2">
+		<s:Label text="Multibyte:" width="70" textAlign="right"/>
+		<s:Button id="decodeButton" label="Decode" click="decodeButton_clickHandler(event)"/>
+		<s:TextInput id="multibyte" width="100%"/>
+		<s:TextInput id="multibyteLength" width="75" editable="false"/>
+	</s:HGroup>
+	<s:HGroup width="100%" verticalAlign="middle" gap="2">
+		<s:Label text="Base64:" width="70" textAlign="right"/>
+		<mx:Spacer width="{this.decodeButton.width}"/>
+		<s:TextInput id="base64" width="100%" editable="false"/>
+		<s:TextInput id="base64Length" width="75" editable="false"/>
+	</s:HGroup>
+	<s:HGroup width="100%" height="100%" gap="0">
+		<s:Scroller width="200" height="100%">
+			<s:VGroup width="100%" paddingLeft="2" paddingRight="2" gap="2" paddingTop="20">
+				<s:CheckBox id="backgroundVisible" selected="true" label="Background" change="changeHandler(event)"/>
+				<s:Label text="Background color"/>
+				<mx:ColorPicker id="backgroundColor" change="changeHandler(event)"/>
+				<mx:Spacer height="20"/>
+				<s:Label text="Figure:" fontWeight="bold"/>
+				<mx:ColorPicker id="figureColor" selectedColor="#FF00FF" change="changeHandler(event)"/>
+				<s:Label text="Alpha"/>
+				<s:HSlider id="figureAlpha" width="100%" value="1" minimum="0" maximum="1" stepSize="0.01" liveDragging="true" change="changeHandler(event)"/>
+				<s:Label text="Vertical align"/>
+				<s:DropDownList id="figureVAlign" width="100%" selectedIndex="1" change="changeHandler(event)">
+					<s:dataProvider>
+						<s:ArrayList>
+							<fx:String>top</fx:String>
+							<fx:String>middle</fx:String>
+							<fx:String>bottom</fx:String>
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Label text="Horizontal align"/>
+				<s:DropDownList id="figureHAlign" width="100%" selectedIndex="1" change="changeHandler(event)" >
+					<s:dataProvider>
+						<s:ArrayList>
+							<fx:String>left</fx:String>
+							<fx:String>center</fx:String>
+							<fx:String>right</fx:String>
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Label text="Vertical scale"/>
+				<s:HSlider id="figureVScale" width="100%" minimum="0" maximum="1" stepSize="0.01" liveDragging="true" change="changeHandler(event)"/>
+				<s:Label text="Horizontal scale"/>
+				<s:HSlider id="figureHScale" width="100%" minimum="0" maximum="1" stepSize="0.01" liveDragging="true" change="changeHandler(event)"/>
+				<mx:Spacer height="20"/>
+				<s:Label text="Text:" fontWeight="bold"/>
+				<mx:ColorPicker id="labelColor" selectedColor="#FFFFFF" change="changeHandler(event)"/>
+				<s:Label text="Alpha"/>
+				<s:HSlider id="labelAlpha" width="100%" value="1" minimum="0" maximum="1" stepSize="0.01" liveDragging="true" change="changeHandler(event)"/>
+				<s:CheckBox id="labelWeight" label="Bold" change="changeHandler(event)"/>
+				<s:CheckBox id="labelStyle" label="Italic" change="changeHandler(event)"/>
+				<s:CheckBox id="labelDecoration" label="Underline" change="changeHandler(event)"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:NumericStepper id="labelSize" minimum="8" maximum="24" value="12" change="changeHandler(event)"/>
+					<s:Label text="Size"/>
+				</s:HGroup>
+				<s:Label text="Text"/>
+				<s:TextInput text="Some text" id="labelText" width="100%" change="changeHandler(event)"/>
+			</s:VGroup>
+		</s:Scroller>
+		<s:Group width="100%" height="100%">
+			<s:Rect width="100%" height="100%" visible="{this.backgroundVisible.selected}">
+				<s:fill>
+					<s:SolidColor color="{this.backgroundColor.selectedColor}"/>
+				</s:fill>
+			</s:Rect>
+			<s:VGroup id="group" width="100%" height="100%" verticalAlign="{this.figureVAlign.selectedItem}" horizontalAlign="{this.figureHAlign.selectedItem}">
+				<s:Rect id="rect" width="{FIGURE_SIZE+(this.group.width-FIGURE_SIZE)*this.figureHScale.value}" height="{FIGURE_SIZE+(this.group.height-FIGURE_SIZE)*this.figureVScale.value}">
+					<s:fill>
+						<s:SolidColor color="{this.figureColor.selectedColor}" alpha="{this.figureAlpha.value}"/>
+					</s:fill>
+				</s:Rect>
+			</s:VGroup>
+			<s:Label 
+				text="{this.labelText.text}" 
+				alpha="{this.labelAlpha.value}" 
+				textAlign="center" 
+				color="{this.labelColor.selectedColor}" 
+				fontSize="{this.labelSize.value}" 
+				fontWeight="{this.labelWeight.selected ? 'bold' : 'normal'}" 
+				fontStyle="{this.labelStyle.selected ? 'italic' : 'normal'}" 
+				textDecoration="{this.labelDecoration.selected ? 'underline' : 'none'}" 
+				left="5" right="5" bottom="10"/>
+		</s:Group>
+	</s:HGroup>
+</s:Application>
