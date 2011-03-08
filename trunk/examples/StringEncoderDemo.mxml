@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:string="aw.projects.multibyte.data.string.*" applicationComplete="application1_applicationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import aw.projects.multibyte.MultibyteWriter;
+			import aw.projects.multibyte.data.MultibytePackage;
+			import aw.projects.multibyte.data.MultibyteStream;
+			import aw.projects.multibyte.data.MultibyteString;
+			import aw.projects.multibyte.data.string.IMultibyteStringEncoder;
+			import aw.projects.multibyte.data.string.MultibyteFixedEncoder;
+			import aw.projects.multibyte.data.string.MultibyteFloatEncoder;
+			import aw.projects.multibyte.data.string.MultibyteRawEncoder;
+			
+			import flashx.textLayout.edit.SelectionManager;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.Base64Encoder;
+			
+			import spark.events.TextOperationEvent;
+			public const asciiStream:MultibyteStream = new MultibyteStream();
+			public const koi8Stream:MultibyteStream = new MultibyteStream();
+			public const fixedStream:MultibyteStream = new MultibyteStream();
+			public const floatStream:MultibyteStream = new MultibyteStream();
+			public const rawStream:MultibyteStream = new MultibyteStream();
+			public const encoder:Base64Encoder = new Base64Encoder();
+			protected function application1_applicationCompleteHandler(event:FlexEvent):void{
+				this.original.setFocus();
+				var writer:MultibyteWriter = new MultibyteWriter();
+				this.asciiStream.addItem(new MultibyteString(this.original, 'text', new MultibyteRawEncoder('ascii')));
+				this.koi8Stream.addItem(new MultibyteString(this.original, 'text', new MultibyteRawEncoder('koi8')));
+				this.fixedStream.addItem(new MultibyteString(this.original, 'text', new MultibyteFixedEncoder()));
+				this.floatStream.addItem(new MultibyteString(this.original, 'text', new MultibyteFloatEncoder()));
+				this.rawStream.addItem(new MultibyteString(this.original, 'text', new MultibyteRawEncoder()));
+				this.encoder.insertNewLines = false;
+			}
+
+			protected function original_changeHandler(event:TextOperationEvent):void{
+				const names:Array = ['ascii', 'koi8', 'fixed', 'float', 'raw'];
+				var originalText:String = this.original.text;
+				var selectionIndex:int = this.original.selectionActivePosition;
+				for each(var name:String in names){
+					var stream:MultibyteStream = this[name+'Stream'];
+					stream.write();
+					this.encoder.encodeBytes(stream.byteArray);
+					var string:String = this.encoder.flush();
+					this[name].text = string;
+					this[name+'Length'].text = string.length;
+					stream.read();
+					this[name+'Result'].text = this.original.text;
+					stream.refresh();
+					this.original.text = originalText;
+				}
+				this.original.selectRange(selectionIndex, selectionIndex);
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingTop="5"/>
+	</s:layout>
+	<s:HGroup width="100%">
+		<mx:Spacer width="100"/>
+		<s:TextInput id="original" width="100%" change="original_changeHandler(event)"/>
+	</s:HGroup>
+	<mx:Spacer height="10"/>
+	<s:Scroller width="100%" height="100%">
+		<s:VGroup width="100%" height="100%" paddingRight="5">
+			<s:VGroup width="100%" paddingBottom="5">
+				<s:Label text="MultibyteFixedEncoder:" paddingLeft="100"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded:" textAlign="right"/>
+					<s:TextInput id="fixed" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Decoded:" textAlign="right"/>
+					<s:TextInput id="fixedResult" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded length:" textAlign="right"/>
+					<s:TextInput id="fixedLength" width="50" editable="false"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="100%" paddingBottom="5">
+				<s:Label text="MultibyteFloatEncoder:" paddingLeft="100"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded:" textAlign="right"/>
+					<s:TextInput id="float" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Decoded:" textAlign="right"/>
+					<s:TextInput id="floatResult" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded length:" textAlign="right"/>
+					<s:TextInput id="floatLength" width="50" editable="false"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="100%" paddingBottom="5">
+				<s:Label text="MultibyteRawEncoder(ascii):" paddingLeft="100"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded:" textAlign="right"/>
+					<s:TextInput id="ascii" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Decoded:" textAlign="right"/>
+					<s:TextInput id="asciiResult" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded length:" textAlign="right"/>
+					<s:TextInput id="asciiLength" width="50" editable="false"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="100%" paddingBottom="5">
+				<s:Label text="MultibyteRawEncoder(koi8):" paddingLeft="100"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded:" textAlign="right"/>
+					<s:TextInput id="koi8" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Decoded:" textAlign="right"/>
+					<s:TextInput id="koi8Result" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded length:" textAlign="right"/>
+					<s:TextInput id="koi8Length" width="50" editable="false"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="100%" paddingBottom="5">
+				<s:Label text="MultibyteRawEncoder(utf-8):" paddingLeft="100"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded:" textAlign="right"/>
+					<s:TextInput id="raw" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Decoded:" textAlign="right"/>
+					<s:TextInput id="rawResult" width="100%" editable="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="100" text="Encoded length:" textAlign="right"/>
+					<s:TextInput id="rawLength" width="50" editable="false"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:VGroup>
+	</s:Scroller>
+</s:Application>
