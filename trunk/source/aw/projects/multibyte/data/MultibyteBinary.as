@@ -27,16 +27,16 @@ package aw.projects.multibyte.data{
 	public class MultibyteBinary extends MultibyteValue{
 		protected var SMALL_SIZE_BITS_COUNT:int = 6;
 		protected var SMALL_SIZE_ID:int = 0;
-		protected var SMALL_SIZE:int = Math.pow(2, SMALL_SIZE_BITS_COUNT)-1;
+		protected var SMALL_SIZE:int = (2<<(SMALL_SIZE_BITS_COUNT-1)-1);
 		protected var MEDIUM_SIZE_BITS_COUNT:int = 14;
 		protected var MEDIUM_SIZE_ID:int = 1;
-		protected var MEDIUM_SIZE:int = Math.pow(2, MEDIUM_SIZE_BITS_COUNT)-1;
+		protected var MEDIUM_SIZE:int = (2<<(MEDIUM_SIZE_BITS_COUNT-1)-1);
 		protected var BIG_SIZE_BITS_COUNT:int = 22;
 		protected var BIG_SIZE_ID:int = 2;
-		protected var BIG_SIZE:int = Math.pow(2, BIG_SIZE_BITS_COUNT)-1;
+		protected var BIG_SIZE:int = (2<<(BIG_SIZE_BITS_COUNT-1)-1);
 		protected var MAXIMUM_SIZE_BITS_COUNT:int = 30;
 		protected var MAXIMUM_SIZE_ID:int = 3;
-		protected var MAXIMUM_SIZE:int = Math.pow(2, MAXIMUM_SIZE_BITS_COUNT)-1;
+		protected var MAXIMUM_SIZE:int = (2<<(MAXIMUM_SIZE_BITS_COUNT-1)-1);
 		protected var _savePosition:Boolean;
 		public function MultibyteBinary(target:Object, name:*, savePosition:Boolean=true):void{
 			super(MultibyteValueType.BINARY, target, name);

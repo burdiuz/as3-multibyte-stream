@@ -62,21 +62,21 @@
 		 */
 		static private const LENGTHS:Array = MultibyteAbstract.getLengths();
 		protected var _autoFill:Boolean;
-		public function MultibyteWriter(ba:ByteArray=null, r:int=0, rl:uint=0, af:Boolean=false):void{
-			super(ba, r, rl);
-			_autoFill = af;
+		public function MultibyteWriter(source:ByteArray=null, remainder:int=0, remainderLength:uint=0, autoFill:Boolean=false):void{
+			super(source, remainder, remainderLength);
+			_autoFill = autoFill;
 		}
 		/**
 		 * Generates methods
 		 * 
 		 */
 		override protected function saveMethods():void{
-			const ba:ByteArray = this._byteArray;
-			const m:Array = this._methods = new Array(3);
-			m[8] = ba.writeByte;
-			m[16] = ba.writeShort;
-			m[32] = ba.writeInt;
-			m[64] = ba.writeDouble;
+			const byteArray:ByteArray = this._byteArray;
+			const methods:Array = this._methods = [];
+			methods[8] = byteArray.writeByte;
+			methods[16] = byteArray.writeShort;
+			methods[32] = byteArray.writeInt;
+			methods[64] = byteArray.writeDouble;
 		}
 		public function write(value:int, length:uint=BYTE_LENGTH, signed:Boolean=true):void{
 			const ba:ByteArray = this._byteArray;
@@ -179,14 +179,15 @@
 				this._remainderLength = 0;
 			}
 		}
+		[Inline]
 		static private function writeReal(list:Vector.<int>, value:Number, length:uint=uint.MAX_VALUE):uint{
-			value = Math.floor(value);
+			value = int(value);
 			if(value){
 				var len:int = list.length-1;
 				var i:uint = 0;
 				while(value && len+i<length){
 					list.unshift(value%2 ? 1 : 0);
-					value = Math.floor(value/2);
+					value = int(value/2);
 					i++;
 				}
 			}else{
@@ -195,8 +196,9 @@
 			}
 			return i;
 		}
+		[Inline]
 		static private function writeFraction(list:Vector.<int>, value:Number, length:uint=uint.MAX_VALUE):uint{
-			value -= Math.floor(value);
+			value -= int(value);
 			var control:Number = 1;
 			var len:uint = list.length-1;
 			var i:uint = 0;
