@@ -15,9 +15,13 @@
 		 */
 		static public const NO_BYTEARRAY_ERROR:String = 'Multibyte Error: ByteArray object is NULL(as constructor parameter).';
 		static protected const LENGTHS:Array = function():Array{
-			var arr:Array = [0];
-			for(var i:int=1; i<65; i++) arr[i] = Math.ceil(i/8)*8;
-			return arr;
+			var list:Array = [0];
+			for(var index:int=1; index<65; index++){
+				var value:Number = index/8;
+				if(value>int(value)) value += 1;
+				list[index] = value<<3;
+			}
+			return list;
 		}();
 		/**
 		 *Use two’s complement number format 
@@ -41,13 +45,16 @@
 		protected var _remainderLength:uint;
 		/**
 		 * ByteArray methods sorted by max bits count
+		 * @param ByteArray Data source, if not exists, will be created for writing.
+		 * @param int Base value to start with
+		 * @param int Length of base value in bits
 		 */
 		protected var _methods:Array;
-		public function MultibyteAbstract(ba:ByteArray=null, r:int=0, rl:uint=0):void{
+		public function MultibyteAbstract(source:ByteArray=null, remainder:int=0, remainderLength:uint=0):void{
 			super();
-			_byteArray = ba ? ba : new ByteArray();
-			_remainder = r;
-			_remainderLength = rl;
+			_byteArray = source ? source : new ByteArray();
+			_remainder = remainder;
+			_remainderLength = remainderLength;
 			if(!_byteArray) throw new Error(NO_BYTEARRAY_ERROR);
 			else saveMethods();
 		}
@@ -59,25 +66,25 @@
 		}
 		/**
 		 * Use two’s complement number format
-		 * @return 
+		 * @return Boolean
 		 * 
 		 */
 		public function get useTwosComplement():Boolean{
 			return this._useTwosComplement;
 		}
-		public function set useTwosComplement(p:Boolean):void{
-			this._useTwosComplement = p;
+		public function set useTwosComplement(value:Boolean):void{
+			this._useTwosComplement = value;
 		}
 		/**
-		 * Source ByteArray object. Must be defined 
-		 * @return 
+		 * Source ByteArray object. Must be defined through constructor or will be creted empty. 
+		 * @return ByteArray
 		 * 
 		 */
 		public function get byteArray():ByteArray{
 			return this._byteArray;
 		}
 		/**
-		 * 
+		 * Length of last value that was readen from the source. 
 		 * @return 
 		 * 
 		 */
@@ -113,11 +120,11 @@
 		}
 		/**
 		 * ByteArray current position
-		 * @param i
+		 * @param uint
 		 * 
 		 */
-		public function set position(i:uint):void{
-			this._byteArray.position = i;
+		public function set position(value:uint):void{
+			this._byteArray.position = value;
 		}
 		public function get position():uint{
 			return this._byteArray.position;
@@ -127,8 +134,8 @@
 		 * @param l
 		 * 
 		 */
-		public function set length(l:uint):void{
-			this._byteArray.length = l;
+		public function set length(value:uint):void{
+			this._byteArray.length = value;
 		}
 		public function get length():uint{
 			return this._byteArray.length;
@@ -136,6 +143,7 @@
 		/**
 		 * @private
 		 */
+		[Inline]
 		static public function getLengths():Array{
 			return LENGTHS;
 		}

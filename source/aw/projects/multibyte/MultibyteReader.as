@@ -1,8 +1,8 @@
 ﻿package aw.projects.multibyte{
-	import aw.utils.BinUtils;
-	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
+	
+	import aw.utils.BinUtils;
 	/**
 	 * 
 	 * @author Galaburda a_[w] Oleg    http://www.actualwave.com
@@ -81,7 +81,7 @@
 		 */
 		override protected function saveMethods():void{
 			var byteArray:ByteArray = this._byteArray;
-			var methods:Array = this._methods = new Array(3);
+			var methods:Array = this._methods = [];
 			methods[8] = byteArray.readUnsignedByte;
 			methods[16] = byteArray.readUnsignedShort;
 			methods[32] = byteArray.readUnsignedInt;
@@ -260,53 +260,6 @@
 			this._remainder = bufferValue & POWS[bufferLength];
 			this._remainderLength = bufferLength;
 			return sign*value;
-		}
-		/**
-		 * @param len
-		 * @param signed
-		 * @return 
-		 * 
-		 */
-		public function readVariableData(len:uint, signed:Boolean=true):Number{
-			var ba:ByteArray = this._byteArray;
-			var val:int = 0; // получаемое значение
-			var temp:int; // внутренний хлам
-			var tempSign:int; // прерыватель
-			var maxb:int = len+Math.ceil(len/BYTE_LENGTH); // максимальное кол-во бит
-			var r:int = this.remainder; // остаток
-			var rl:int = this.remainderLength; // длина остатка
-			var bl:int = BYTE_LENGTH-1; // 7-емь бит
-			var pbl:int = POWS[bl]; // маска 7-ми бит
-			for(var i:int=1; i<VARIABLE_MAX_LENGTH; i++){
-				if(rl<BYTE_LENGTH){
-					r<<BYTE_LENGTH | ba.readUnsignedByte(); // считывание данных. длинна останется прежней после отсечения нужных данных.
-				}else rl -= BYTE_LENGTH;
-				temp = r>>rl; // данные для обработки
-				tempSign = temp>>bl;
-				val = val<<bl | temp&pbl; // присваиваем значение
-				r = r&POWS[rl]; // убираем считаное из остатка
-				if(!tempSign) break; // проверка на целосность
-			}
-			var l_1:int;
-			if(i==VARIABLE_MAX_LENGTH){
-				l_1 = len-1;
-				this._remainder = r;
-				this._remainderLength = rl;
-			}else{
-				l_1 = i*bl-1;
-			}
-			/* TODO
-			if(signed && (1<<l_1 & val)>>l_1){
-				val = this._useTwosComplement ? -(--val^POWS[l]) : -(val&POWS[l_1]);
-			}
-			*/
-			return val;
-		}
-		public function readVariable(len:uint):int{
-			return int(readVariableData(len, true));
-		}
-		public function readUnsignedVariable(len:uint):uint{
-			return uint(readVariableData(len, false));
 		}
 		public function read(l:uint=8):int{
 			return int(readData(l, true));

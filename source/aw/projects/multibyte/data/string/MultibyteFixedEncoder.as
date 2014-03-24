@@ -57,7 +57,7 @@ package aw.projects.multibyte.data.string{
 				bitsPerChar = this._bitsPerChar;
 			}else{
 				codes = new Vector.<uint>(length, true);
-				bitsPerChar = BinUtils.getClosePow(this.getCodes(value, codes));
+				bitsPerChar = BinUtils.getValuesPow(this.getCodes(value, codes));
 			}
 			writer.write(bitsPerChar, CHAR_BITS_COUNT, false);
 			for each(var code:uint in codes) writer.write(code, bitsPerChar, false);
