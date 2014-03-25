@@ -1,5 +1,8 @@
 ﻿package aw.projects.multibyte{
 	import flash.utils.ByteArray;
+	
+	import aw.utils.MathUtils;
+
 	[ExcludeClass]
 	/**
 	 * Abstract class that contains shared methods and properties for MultibyteReader and MultibyteWriter
@@ -17,9 +20,7 @@
 		static protected const LENGTHS:Array = function():Array{
 			var list:Array = [0];
 			for(var index:int=1; index<65; index++){
-				var value:Number = index/8;
-				if(value>int(value)) value += 1;
-				list[index] = value<<3;
+				list[index] = MathUtils.ceil(index/8)<<3;
 			}
 			return list;
 		}();

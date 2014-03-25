@@ -95,20 +95,20 @@ package aw.projects.multibyte.data{
 		}
 		override internal function read(reader:MultibyteReader):void{
 			var value:ByteArray = null;
-			var id:uint = reader.readData(2, false);
+			var id:uint = reader.readCustom(2, false);
 			var count:uint = getHeaderBitsCountById(id);
-			var length:uint = reader.readData(count, false);
-			if(reader.readData(1, false)){
+			var length:uint = reader.readCustom(count, false);
+			if(reader.readCustom(1, false)){
 				value = new ByteArray();
-				value.endian = reader.readData(1, false) ? Endian.BIG_ENDIAN : Endian.LITTLE_ENDIAN;
-				value.objectEncoding = reader.readData(1, false) ? ObjectEncoding.AMF3 : ObjectEncoding.AMF0;
-				reader.readData(4, false)
+				value.endian = reader.readCustom(1, false) ? Endian.BIG_ENDIAN : Endian.LITTLE_ENDIAN;
+				value.objectEncoding = reader.readCustom(1, false) ? ObjectEncoding.AMF3 : ObjectEncoding.AMF0;
+				reader.readCustom(4, false)
 				var position:int = 0;
-				if(reader.readData(1, false)){
-					position = reader.readData(count, false);
+				if(reader.readCustom(1, false)){
+					position = reader.readCustom(count, false);
 				}
 				for(var i:int=0; i<length; i++){
-					value.writeByte(reader.readData(8, false));
+					value.writeByte(reader.readCustom(8, false));
 				}
 				value.position = position;
 			}

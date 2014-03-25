@@ -55,11 +55,11 @@ package aw.projects.multibyte.data{
 			this._exponentSigned = value;
 		}
 		override internal function read(reader:MultibyteReader):void{
-			var value:Number = reader.readDataFloat(this._length, this._exponentLength, this._signed, this._exponentSigned);
+			var value:Number = reader.readCustomFloat(this._length, this._exponentLength, this._signed, this._exponentSigned);
 			this.setValue(value);
 		}
 		override internal function write(writer:MultibyteWriter):void{
-			writer.writeDataFloat(this.getValue(), this._length, this._exponentLength, this._signed, this._exponentSigned);
+			writer.writeCustomFloat(this.getValue(), this._length, this._exponentLength, this._signed, this._exponentSigned);
 		}
 	}
 }

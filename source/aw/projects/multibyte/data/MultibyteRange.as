@@ -2,6 +2,8 @@ package aw.projects.multibyte.data{
 	import aw.projects.multibyte.MultibyteReader;
 	import aw.projects.multibyte.MultibyteWriter;
 	import aw.utils.BinUtils;
+	import aw.utils.MathUtils;
+
 	/**
 	 * 
 	 * @author Galaburda a_[w] Oleg    http://www.actualwave.com
@@ -16,12 +18,17 @@ package aw.projects.multibyte.data{
 			resetBorders(minimum, maximum);
 		}
 		protected function resetBorders(value1:int, value2:int):void{
-			this._minimum = Math.min(value1, value2);
-			this._maximum = Math.max(value1, value2);
+			if(value1<value2){
+				this._minimum = value1;
+				this._maximum = value2;
+			}else{
+				this._minimum = value2;
+				this._maximum = value1;
+			}
 			this.countLength();
 		}
 		protected function countLength():void{
-			var diff:uint = Math.abs(this._maximum-this._minimum);
+			var diff:uint = MathUtils.abs(this._maximum-this._minimum);
 			this._length = BinUtils.getBitCount(diff);
 		}
 		override public function get length():uint{
@@ -44,7 +51,7 @@ package aw.projects.multibyte.data{
 			}
 		}
 		override internal function read(reader:MultibyteReader):void{
-			this.setValue(this._minimum+reader.readData(this._length, this._minimum<0));
+			this.setValue(this._minimum+reader.readCustom(this._length, this._minimum<0));
 		}
 		override internal function write(writer:MultibyteWriter):void{
 			writer.write(this.getValue()-this._minimum, this._length, this._minimum<0);

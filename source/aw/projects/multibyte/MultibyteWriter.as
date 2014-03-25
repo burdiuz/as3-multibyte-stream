@@ -100,21 +100,25 @@
 				if(this._autoFill) this.fill();
 			}
 		}
+		public function writeBoolean(value:Boolean):void{
+			return write(int(value), 1, false);
+		}
 		public function writeFloat(value:Number):void{
 			if(this._remainderLength){
-				this.writeDataFloat(value, FP_LENGTH, FP_EXPONENT_LENGTH, true, true);
+				this.writeCustomFloat(value, FP_LENGTH, FP_EXPONENT_LENGTH, true, true);
 			}else{
 				this._byteArray.writeFloat(value);
 			}
 		}
 		public function writeDouble(value:Number):void{
 			if(this._remainderLength){
-				this.writeDataFloat(value, FP2_LENGTH, FP2_EXPONENT_LENGTH, true, true);
+				this.writeCustomFloat(value, FP2_LENGTH, FP2_EXPONENT_LENGTH, true, true);
 			}else{
 				this._byteArray.writeDouble(value);
 			}
 		}
-		public function writeDataFloat(value:Number, fullLength:uint=FP_LENGTH, expLength:uint=FP_EXPONENT_LENGTH, saveSign:Boolean=true, saveExpSign:Boolean=true):void{
+		
+		public final function writeCustomFloat(value:Number, fullLength:uint=FP_LENGTH, expLength:uint=FP_EXPONENT_LENGTH, saveSign:Boolean=true, saveExpSign:Boolean=true):void{
 			if(isNaN(value)){
 				this.writeNaN(fullLength, expLength, saveSign);
 				return;

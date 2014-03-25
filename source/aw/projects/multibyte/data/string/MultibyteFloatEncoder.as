@@ -4,6 +4,7 @@ package aw.projects.multibyte.data.string{
 	import aw.projects.multibyte.MultibyteReader;
 	import aw.projects.multibyte.MultibyteWriter;
 	import aw.utils.BinUtils;
+	import aw.utils.MathUtils;
 
 	/*
 	один бит - 0, простое значение; 1, сложное значение
@@ -21,11 +22,11 @@ package aw.projects.multibyte.data.string{
 	public class MultibyteFloatEncoder extends Object implements IMultibyteStringEncoder{
 		static public const TYPE_VALUE_BITS_COUNT:int = 1;
 		static public const SIMPLE_VALUE_BITS_COUNT:int = 8;
-		static public const SIMPLE_MAX_VALUE:int = Math.pow(2, SIMPLE_VALUE_BITS_COUNT)-1;
+		static public const SIMPLE_MAX_VALUE:int = (2<<SIMPLE_VALUE_BITS_COUNT)-1;
 		static public const COMPLEX_LENGTH_BITS_COUNT:int = 4;
-		static public const COMPLEX_MAX_LENGTH:int = Math.pow(2, COMPLEX_LENGTH_BITS_COUNT)-1;
+		static public const COMPLEX_MAX_LENGTH:int = (2<<COMPLEX_LENGTH_BITS_COUNT)-1;
 		static public const COMPLEX_ITEMS_BITS_COUNT:int = 4;
-		static public const COMPLEX_MAX_ITEMS:int = Math.pow(2, COMPLEX_ITEMS_BITS_COUNT)-1;
+		static public const COMPLEX_MAX_ITEMS:int = (2<<COMPLEX_ITEMS_BITS_COUNT)-1;
 		protected var _value:String;
 		protected var _valuesCache:Vector.<int>;
 		protected var _lengthsCache:Vector.<int>;
@@ -55,11 +56,11 @@ package aw.projects.multibyte.data.string{
 			for(var i:int=0; i<value.length; i++){
 				var code:int = value.charCodeAt(i);
 				if(this._started){
-					var distance:int = Math.abs(this._minValue-code);
+					var distance:int = MathUtils.abs(this._minValue-code);
 					if(distance<this._packageDistance){
 						temp.push(code);
-						this._minValue = Math.min(this._minValue, code);
-						this._maxValue = Math.max(this._maxValue, code);
+						this._minValue = MathUtils.min(this._minValue, code);
+						this._maxValue = MathUtils.max(this._maxValue, code);
 						if(temp.length==COMPLEX_MAX_ITEMS){
 							this.calculateComplex(temp);
 							temp = null;
@@ -112,16 +113,16 @@ package aw.projects.multibyte.data.string{
 			var value:String = '';
 			while(length){
 				length -= TYPE_VALUE_BITS_COUNT;
-				if(reader.readData(TYPE_VALUE_BITS_COUNT, false)){
-					var bitsCount:int = reader.readData(COMPLEX_LENGTH_BITS_COUNT, false);
-					var count:int = reader.readData(COMPLEX_ITEMS_BITS_COUNT, false);
+				if(reader.readCustom(TYPE_VALUE_BITS_COUNT, false)){
+					var bitsCount:int = reader.readCustom(COMPLEX_LENGTH_BITS_COUNT, false);
+					var count:int = reader.readCustom(COMPLEX_ITEMS_BITS_COUNT, false);
 					length -= COMPLEX_LENGTH_BITS_COUNT+COMPLEX_ITEMS_BITS_COUNT+count*bitsCount;
 					while(count){
-						value += String.fromCharCode(reader.readData(bitsCount,  false));
+						value += String.fromCharCode(reader.readCustom(bitsCount,  false));
 						count--;
 					}
 				}else{
-					value += String.fromCharCode(reader.readData(SIMPLE_VALUE_BITS_COUNT,  false));
+					value += String.fromCharCode(reader.readCustom(SIMPLE_VALUE_BITS_COUNT,  false));
 					length -= SIMPLE_VALUE_BITS_COUNT;
 				}
 			}
