@@ -39,7 +39,7 @@ package aw.projects.multibyte.data.string{
 			byteArray.objectEncoding = source.objectEncoding;
 			length /= MultibyteWriter.BYTE_LENGTH;
 			for(var i:int=0; i<length; i++){
-				byteArray.writeByte(reader.readData(MultibyteWriter.BYTE_LENGTH, false));
+				byteArray.writeByte(reader.readCustom(MultibyteWriter.BYTE_LENGTH, false));
 			}
 			var value:String;
 			byteArray.position = 0;

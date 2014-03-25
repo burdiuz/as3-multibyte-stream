@@ -21,7 +21,7 @@ package aw.projects.multibyte.data.string{
 			var count:uint = length/MultibyteWriter.BYTE_LENGTH;
 			var value:String = '';
 			while(count>0){
-				value += String.fromCharCode(reader.readData(MultibyteWriter.BYTE_LENGTH, false));
+				value += String.fromCharCode(reader.readCustom(MultibyteWriter.BYTE_LENGTH, false));
 				count--;
 			}
 			return value;

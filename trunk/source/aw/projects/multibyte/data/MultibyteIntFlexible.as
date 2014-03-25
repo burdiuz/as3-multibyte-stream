@@ -2,6 +2,8 @@ package aw.projects.multibyte.data{
 	import aw.projects.multibyte.MultibyteReader;
 	import aw.projects.multibyte.MultibyteWriter;
 	import aw.utils.BinUtils;
+	import aw.utils.MathUtils;
+
 	/**
 	 * 
 	 * @author Galaburda a_[w] Oleg    http://www.actualwave.com
@@ -26,15 +28,15 @@ package aw.projects.multibyte.data{
 			this._signed = value;
 		}
 		override public function get length():uint{
-			return Math.ceil(BinUtils.getBitCount(this.getValue())/BYTE_LENGTH)+HEADER_COUNT;
+			return MathUtils.ceil(BinUtils.getBitCount(this.getValue())/BYTE_LENGTH)+HEADER_COUNT;
 		}
 		override internal function read(reader:MultibyteReader):void{
-			var count:int = reader.readData(HEADER_COUNT, false);
-			this.setValue(reader.readData(BYTE_LENGTH*count, false));
+			var count:int = reader.readCustom(HEADER_COUNT, false);
+			this.setValue(reader.readCustom(BYTE_LENGTH*count, false));
 		}
 		override internal function write(writer:MultibyteWriter):void{
 			var value:int = this.getValue();
-			var count:int = Math.ceil(BinUtils.getBitCount(value)/BYTE_LENGTH);
+			var count:int = MathUtils.ceil(BinUtils.getBitCount(value)/BYTE_LENGTH);
 			writer.write(count, HEADER_COUNT, false);
 			writer.write(value, count*BYTE_LENGTH, this._signed);
 		}

@@ -121,7 +121,7 @@
 		 * @return 
 		 * 
 		 */
-		public function readData(length:int, signed:Boolean=true):Number{
+		public function readCustom(length:int, signed:Boolean=true):Number{
 			this._lastLength = length;
 			var ba:ByteArray = this._byteArray;
 			var remainderLength:int = this._remainderLength;
@@ -166,11 +166,11 @@
 		 * 	trace(bytes.readFloat()); // 1024
 		 * 	bytes.position = 0;
 		 * 	var reader:MultibyteReader = new MultibyteReader(bytes);
-		 * 	trace(reader.readDataFloat()); // NaN
-		 * 	trace(reader.readDataFloat()); // Infinity
-		 * 	trace(reader.readDataFloat()); // -Infinity
-		 * 	trace(reader.readDataFloat()); // 3.1399998664855957
-		 * 	trace(reader.readDataFloat()); // 1024
+		 * 	trace(reader.readCustomFloat()); // NaN
+		 * 	trace(reader.readCustomFloat()); // Infinity
+		 * 	trace(reader.readCustomFloat()); // -Infinity
+		 * 	trace(reader.readCustomFloat()); // 3.1399998664855957
+		 * 	trace(reader.readCustomFloat()); // 1024
 		 * </listing>
 		 * @param fullLength Number length in bits
 		 * @param exponentLength Number exponent length in bits
@@ -180,7 +180,7 @@
 		 * @return 
 		 * 
 		 */
-		public function readDataFloat(fullLength:uint=FP_LENGTH, exponentLength:uint=FP_EXPONENT_LENGTH, signed:Boolean=true, exponentSigned:Boolean=true, allowNanInfinity:Boolean=true):Number{
+		public final function readCustomFloat(fullLength:uint=FP_LENGTH, exponentLength:uint=FP_EXPONENT_LENGTH, signed:Boolean=true, exponentSigned:Boolean=true, allowNanInfinity:Boolean=true):Number{
 			this._lastLength = fullLength;
 			var bufferLength:Number = this._remainderLength;
 			var bufferValue:Number = this._remainder;
@@ -262,21 +262,24 @@
 			return sign*value;
 		}
 		public function read(l:uint=8):int{
-			return int(readData(l, true));
+			return int(readCustom(l, true));
 		}
 		public function readUnsigned(l:uint=8):uint{
-			return uint(readData(l, false));
+			return uint(readCustom(l, false));
+		}
+		public function readBoolean():Boolean{
+			return Boolean(readCustom(1, false));
 		}
 		public function readFloat():Number{
 			if(this._lastLength){
-				return this.readDataFloat(FP_LENGTH, FP_EXPONENT_LENGTH);
+				return this.readCustomFloat(FP_LENGTH, FP_EXPONENT_LENGTH, true, true, true);
 			}else{
 				return this._byteArray.readFloat();
 			}
 		}
 		public function readDouble():Number{
 			if(this._lastLength){
-				return this.readDataFloat(FP2_LENGTH, FP2_EXPONENT_LENGTH);
+				return this.readCustomFloat(FP2_LENGTH, FP2_EXPONENT_LENGTH, true, true, true);
 			}else{
 				return this._byteArray.readDouble();
 			}

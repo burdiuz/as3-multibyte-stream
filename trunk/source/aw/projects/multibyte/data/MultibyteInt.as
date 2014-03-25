@@ -27,7 +27,7 @@ package aw.projects.multibyte.data{
 			this._length = value;
 		}
 		override internal function read(reader:MultibyteReader):void{
-			this.setValue(reader.readData(this._length, this._signed));
+			this.setValue(reader.readCustom(this._length, this._signed));
 		}
 		override internal function write(writer:MultibyteWriter):void{
 			writer.write(this.getValue(), this._length, this._signed);

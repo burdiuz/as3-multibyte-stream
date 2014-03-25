@@ -3,6 +3,7 @@ package aw.projects.multibyte.data.string{
 	import aw.projects.multibyte.MultibyteReader;
 	import aw.projects.multibyte.MultibyteWriter;
 	import aw.utils.BinUtils;
+	import aw.utils.MathUtils;
 
 	/*
 	Определяется максимальное число бит в кодах, далее это значение записывается и каждый код значения записывается в указанное кол-во бит
@@ -33,18 +34,18 @@ package aw.projects.multibyte.data.string{
 			var code:int;
 			for(var i:int=0; i<length; i++){
 				code = value.charCodeAt(i);
-				max = Math.max(max, code);
+				max = MathUtils.max(max, code);
 				target[i] = code;
 			}
 			return max;
 		}
 		public function read(length:uint, reader:MultibyteReader):String{
 			length -= CHAR_BITS_COUNT;
-			var bitsPerChar:int = reader.readData(CHAR_BITS_COUNT, false);
+			var bitsPerChar:int = reader.readCustom(CHAR_BITS_COUNT, false);
 			length /= bitsPerChar;
 			var value:String = '';
 			while(length>0){
-				value += String.fromCharCode(reader.readData(bitsPerChar, false));
+				value += String.fromCharCode(reader.readCustom(bitsPerChar, false));
 				length--;
 			}
 			return value;
