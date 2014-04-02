@@ -69,7 +69,7 @@ class Bytes{
 		return (boolean)$this->readUnsignedByte();
 	}
 	public function readByte(){
-		return self::convertToSignedForm($this->readUnsignedByte(), self::BYTE_LENGTH, $this->_useTwosComplement);
+		return BinUtils::convertToSignedForm($this->readUnsignedByte(), self::BYTE_LENGTH, $this->_useTwosComplement);
 	}
 	public function readUnsignedByte(){
 		if($this->_position<$this->_length){
@@ -88,7 +88,7 @@ class Bytes{
 	 * http://en.wikipedia.org/wiki/Two's_complement
 	 */
 	public function writeByte($value){
-		$this->writeUnsignedByte(self::convertToUnsignedForm($value, self::BYTE_LENGTH, $this->_useTwosComplement));
+		$this->writeUnsignedByte(BinUtils::convertToUnsignedForm($value, self::BYTE_LENGTH, $this->_useTwosComplement));
 	}
 	protected function writeUnsignedByte($value){
 		$this->_data[$this->_position++] = chr(((int)$value) & self::BYTE_MASK);
@@ -102,6 +102,9 @@ class Bytes{
 		$this->_length = 0;
 	}
 }
+
+/* TEST
+require_once 'BinUtils.php';
 
 $bytes = new Bytes("abc", true);
 //read test
@@ -150,5 +153,5 @@ echo $bytes->readByte().'<br/>';
 $bytes->writeByte(-7);
 $bytes->position--;
 echo $bytes->readByte().'<br/>';
-
+//*/
 ?>

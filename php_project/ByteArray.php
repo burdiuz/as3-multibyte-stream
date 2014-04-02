@@ -44,9 +44,6 @@ class ByteArray extends Bytes implements IDataInput, IDataOutput{
 	public function readInt(){
 		
 	}
-	public function readMultiByte($length, $charSet){
-		
-	}
 	public function readShort(){
 		
 	}
@@ -54,12 +51,6 @@ class ByteArray extends Bytes implements IDataInput, IDataOutput{
 		
 	}
 	public function readUnsignedShort(){
-		
-	}
-	public function readUTF(){
-		
-	}
-	public function readUTFBytes($length){
 		
 	}
 	public function writeBytes($bytes, $offset = 0, $length = 0){
@@ -74,13 +65,21 @@ class ByteArray extends Bytes implements IDataInput, IDataOutput{
 	public function writeInt($value){
 		
 	}
-	public function writeMultiByte($value, $charSet){
-		
-	}
 	public function writeShort($value){
 		
 	}
 	public function writeUnsignedInt($value){
+		
+	}
+	/** DO WE NEED UTF-8 methods? 
+	 *TODO: Research, is it possible to make multiByte read/write methods with PHP core API.
+	public function readUTF(){
+		
+	}
+	public function readUTFBytes($length){
+		
+	}
+	public function readMultiByte($length, $charSet){
 		
 	}
 	public function writeUTF($value){
@@ -89,6 +88,10 @@ class ByteArray extends Bytes implements IDataInput, IDataOutput{
 	public function writeUTFBytes($value){
 		
 	}
+	public function writeMultiByte($value, $charSet){
+		
+	}
+	*/
 }
 
 ?>
