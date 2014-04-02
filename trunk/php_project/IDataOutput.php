@@ -33,12 +33,6 @@ interface IDataOutput{
 	 */
 	public function writeInt($value);
 	/**
-	 * «аписывает многобайтовую строку в поток байтов с использованием заданного набора знаков.
-	 * @param $value String
-	 * @param charSet String
-	 */
-	public function writeMultiByte($value, $charSet);
-	/**
 	 * «аписывает объект в массив байтов в сериализованном формате AMF.
 	 * @param mixed
 	 *
@@ -57,13 +51,20 @@ interface IDataOutput{
 	/**
 	 * «аписывает строку UTF-8 в поток байтов.
 	 * @param $value String
-	 */
+	 * /
 	public function writeUTF($value); 
 	/**
 	 * «аписывает строку UTF-8 в поток байтов.
 	 * @param $value String
-	 */
+	 * /
 	public function writeUTFBytes($value);
+	/**
+	 * «аписывает многобайтовую строку в поток байтов с использованием заданного набора знаков.
+	 * @param $value String
+	 * @param charSet String
+	 * /
+	public function writeMultiByte($value, $charSet);
+	*/
 }
 
 ?>

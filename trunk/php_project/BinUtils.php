@@ -287,7 +287,12 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 	static public function convertToSignedForm($value, $length=32, $useTwosComplement=true){
 		$signBit = 1<<($length-1);
 		if($value & $signBit){
-			$value = $useTwosComplement ? -(abs($value) ^ ((1<<$length)-1))-1 : -(abs($value) & ($signBit-1));
+			// Special case for PHP numbers here. We should skip conversion if length = 32 and $useTwosComplement = true because its natural form of PHP negative numbers, so its "already converted".
+			if($useTwosComplement){
+				$value = $length == 32 && $value<0 ? $value : -abs($value+1) ^ ((1<<$length)-1);
+			}else{
+				$value = -($value & ($signBit-1));
+			}
 		}
 		return $value;
 	}
@@ -307,7 +312,7 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 	 * @param $position integer
 	 * @param endian integer 
 	 */
-	static public function readUnsignedNumber($stream, $bytesCount, $position=0, $endian=1){
+	static public function readUnsignedNumber($stream, $bytesCount=4, $position=0, $endian=1){
 		$result = 0;
 		for($index=0; $index<$bytesCount; $index++){
 			$byte = ord($stream[$position+$index]);
@@ -323,9 +328,9 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 		}
 		return $result;
 	}
-	static public function readNumber($stream, $bytesCount, $position=0, $endian=1, $useTwosComplement=true){
+	static public function readNumber($stream, $bytesCount=4, $position=0, $endian=1, $useTwosComplement=true){
 		$result = self::readUnsignedNumber($stream, $bytesCount, $position, $endian);
-		return self::convertToSignedForm($result, $bytesCount*8);
+		return self::convertToSignedForm($result, $bytesCount*8, $useTwosComplement);
 	}
 	/**
 	 * 
@@ -336,12 +341,12 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 	 * @param number $endian
 	 * @param string $useTwosComplement
 	 */
-	static public function writeNumber($stream, $value, $position, $bytesCount=4, $endian=1, $useTwosComplement=true){
+	static public function writeNumber($stream, $value, $bytesCount=4, $position=0, $endian=1, $useTwosComplement=true){
 		if($value<0){
-			if($useTwosComplement) $stream = self::write2sComplementNegativeNumber($stream, $value, $position, $bytesCount, $endian);
-			else $stream = self::writeNormalizedNegativeNumber($stream, $value, $position, $bytesCount, $endian);
+			if($useTwosComplement) $stream = self::write2sComplementNegativeNumber($stream, $value, $bytesCount, $position, $endian);
+			else $stream = self::writeNormalizedNegativeNumber($stream, $value, $bytesCount, $position, $endian);
 		}else{
-			$stream = self::writeUnsignedNumber($stream, $value, $position, $bytesCount, $endian);
+			$stream = self::writeUnsignedNumber($stream, $value, $bytesCount, $position, $endian);
 		}
 		return (string)$stream;
 	}
@@ -353,7 +358,7 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 	 * @param number $bytesCount
 	 * @param number $endian
 	 */
-	static public function writeUnsignedNumber($stream, $value, $position, $bytesCount=4, $endian=1){
+	static public function writeUnsignedNumber($stream, $value, $bytesCount=4, $position=0, $endian=1){
 		if($value<0) $value = -$value;
 		for($index=0; $index<$bytesCount; $index++){
 			switch($endian){
@@ -378,7 +383,7 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 	 * @param number $bytesCount
 	 * @param number $endian
 	 */
-	static protected function write2sComplementNegativeNumber($stream, $value, $position, $bytesCount=4, $endian=1){
+	static protected function write2sComplementNegativeNumber($stream, $value, $bytesCount=4, $position=0, $endian=1){
 		for($index=0; $index<$bytesCount; $index++){
 			switch($endian){
 				case Endian::LITTLE_ENDIAN:
@@ -394,7 +399,7 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 		}
 		return (string)$stream;
 	}
-	static protected function writeNormalizedNegativeNumber($stream, $value, $position, $bytesCount=4, $endian=1){
+	static protected function writeNormalizedNegativeNumber($stream, $value, $bytesCount=4, $position=0, $endian=1){
 		$bytes = "";
 		$increase = true;
 		$lastIndex = $bytesCount-1;
@@ -407,7 +412,7 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
 				if($byte <= 0xFF) $increase = false;
 				else $byte &= 0xFF; // in case if we have this situation even on last byte, that means total value is more than $bytesCount and should produce calculation error;
 			}
-			echo str_pad(decbin($byte), 8, '0', STR_PAD_LEFT).'<br>';
+			//echo str_pad(decbin($byte), 8, '0', STR_PAD_LEFT).'<br>';
 			switch($endian){
 				case Endian::LITTLE_ENDIAN:
 					$bytes .= chr($byte);
@@ -442,17 +447,43 @@ trace(BinUtils.convertSignedInt(i, 8).toString(2));
     	return ($value >= 0) ? ($value >> $bias) : (($value & 0x7fffffff) >> $bias) | (0x40000000 >> ($bias - 1));
 	}
 }
-
+/* TESTS
+?>
+<span style="font-family:Lucida Console; ">
+<?php 
 require "Endian.php";
 BinUtils::__initialize();
-$stream = " ";
-$val = -23454;
-echo (1<<7).'<br>';
-echo $val.'<br>';
-echo strlen(decbin($val)).', '.decbin($val).'<br>';
-$stream = BinUtils::writeNumber($stream, $val, 0, 4, 1, false);
-echo strlen(BinUtils::str2bin($stream)).', '.BinUtils::str2bin($stream).'<br>';
-echo decbin(BinUtils::readNumber($stream, 4, 0, 1, false)).'<br>';
-echo decbin(19).', '.decbin(19 ^ 255);
+
+function testConversion($value, $length, $endian, $twosComplement){
+	$stream = " ";
+	echo '------ START -------------- '.$value.'<br>';
+	$stream = BinUtils::writeNumber($stream, $value, $length, 0, $endian, $twosComplement);
+	echo 'ORIG:'.str_pad(strlen(decbin($value)), 2, ' ', STR_PAD_LEFT).', '.strInt32(decbin($value)).'<br>';
+	echo 'WRIT:'.str_pad(strlen(BinUtils::str2bin($stream)), 2, ' ', STR_PAD_LEFT).', '.strInt32(BinUtils::str2bin($stream)).'<br>';
+	$value = BinUtils::readNumber($stream, $length, 0, $endian, $twosComplement);
+	echo 'READ:'.str_pad(strlen(decbin($value)), 2, ' ', STR_PAD_LEFT).', '.strInt32(decbin($value)).'<br>';
+	echo '------ END ---------------- '.$value.'<br>';
+}
+function strInt32($value){
+	return str_replace(' ', '&nbsp;', str_pad($value, 32, ' ', STR_PAD_LEFT));
+}
+testConversion(-2346, 4, Endian::BIG_ENDIAN, true);
+testConversion(-2346, 4, Endian::BIG_ENDIAN, false);
+testConversion(-754, 2, Endian::BIG_ENDIAN, true);
+testConversion(-754, 2, Endian::BIG_ENDIAN, false);
+testConversion(-2346, 4, Endian::LITTLE_ENDIAN, true);
+testConversion(-2346, 4, Endian::LITTLE_ENDIAN, false);
+testConversion(-754, 2, Endian::LITTLE_ENDIAN, true);
+testConversion(-754, 2, Endian::LITTLE_ENDIAN, false);
+
+testConversion(3426, 4, Endian::BIG_ENDIAN, true);
+testConversion(3426, 4, Endian::BIG_ENDIAN, false);
+testConversion(457, 2, Endian::BIG_ENDIAN, true);
+testConversion(457, 2, Endian::BIG_ENDIAN, false);
+testConversion(4623, 4, Endian::LITTLE_ENDIAN, true);
+testConversion(4623, 4, Endian::LITTLE_ENDIAN, false);
+testConversion(574, 2, Endian::LITTLE_ENDIAN, true);
+testConversion(574, 2, Endian::LITTLE_ENDIAN, false);
 ///echo decbin(BinUtils::convertToUnsignedForm(-127, 16, false));
+//*/
 ?>

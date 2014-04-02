@@ -34,13 +34,6 @@ interface IDataInput{
 	 */
 	public function readInt();
 	/**
-	 * —читывает из потока байтов многобайтовую строку заданной длины с использованием заданного набора знаков.
-	 * @param $length int
-	 * @param $charSet String
-	 * @return string
-	 */
-	public function readMultiByte($length, $charSet);
-	/**
 	 * —читывает объект из массива байтов, зашифрованного в сериализованный формат AMF.
 	 * @return resource
 	 *
@@ -66,16 +59,25 @@ interface IDataInput{
 	 * @return int
 	 */
 	public function readUnsignedShort();
+	
 	/**
 	 * —читывает из потока байтов строку UTF-8.
 	 * @return string
-	 */
+	 * /
 	public function readUTF();
 	/**
 	 * —читывает последовательность байтов UTF-8, заданную параметром length, из потока байтов и возвращает строку.
 	 * @return string
-	 */
+	 * /
 	public function readUTFBytes($length);
+	/**
+	 * —читывает из потока байтов многобайтовую строку заданной длины с использованием заданного набора знаков.
+	 * @param $length int
+	 * @param $charSet String
+	 * @return string
+	 * /
+	public function readMultiByte($length, $charSet);
+	*/
 }
 
 ?>
